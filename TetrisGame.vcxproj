@@ -59,6 +59,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -77,6 +78,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -88,6 +90,8 @@
     <ClCompile Include="src\TetrisGame.cpp" />
     <ClCompile Include="src\ScoreSystem.cpp" />
     <ClCompile Include="src\WindowsInputHandler.cpp" />
+    <ClCompile Include="src\ControllerInputHandler.cpp" />
+    <ClCompile Include="src\FileConfigManager.cpp" />
     <ClCompile Include="src\TetrisApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +106,9 @@
     <ClInclude Include="src\TetrisGame.h" />
     <ClInclude Include="src\ScoreSystem.h" />
     <ClInclude Include="src\WindowsInputHandler.h" />
+    <ClInclude Include="src\ControllerInputHandler.h" />
+    <ClInclude Include="src\CombinedInputHandler.h" />
+    <ClInclude Include="src\FileConfigManager.h" />
     <ClInclude Include="src\TetrisApplication.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -158,3 +158,9 @@ bool ControllerInputHandler::wasJustPausePressed() const {
 bool ControllerInputHandler::wasJustQuitPressed() const {
     return isButtonDown(BTN_SELECT) && !wasButtonDown(BTN_SELECT);
 }
+
+bool ControllerInputHandler::wasJustConfirmPressed() const {
+    // Start or A button acts as confirm in menus
+    return (isButtonDown(BTN_START)  && !wasButtonDown(BTN_START)) ||
+           (isButtonDown(BTN_A)      && !wasButtonDown(BTN_A));
+}

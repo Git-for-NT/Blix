@@ -21,7 +21,7 @@ public:
     void renderScore(const ScoreSystem& score) override;
     void renderNextPiece(TetrominoType type) override;
     void renderPauseOverlay() override;
-    void renderGameOverOverlay(int finalScore) override;
+    void renderGameOverOverlay(int finalScore, int highScore) override;
     void renderMenu() override;
     void clear() override;
     void present() override;

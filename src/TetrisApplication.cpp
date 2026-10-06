@@ -1,7 +1,12 @@
 #include "TetrisApplication.h"
 #include "TetrisGame.h"
+#include "CombinedInputHandler.h"
+#include "WindowsInputHandler.h"
+#include "ControllerInputHandler.h"
+#include "FileConfigManager.h"
 #include <iostream>
 #include <stdexcept>
+#include <memory>
 
 // ---------------------------------------------------------------------------
 // Console sizing constants
@@ -42,12 +47,21 @@ void TetrisApplication::run() {
     // 1. Configure the console window (title, size, cursor, signal handler).
     setupConsole();
 
-    // 2. Create the game object AFTER the console is ready.
-    game = new TetrisGame();
+    // 2. Build the input handler: keyboard always present, controller optional.
+    auto combined = std::make_unique<CombinedInputHandler>();
+    combined->addHandler(std::make_unique<WindowsInputHandler>());
+    combined->addHandler(std::make_unique<ControllerInputHandler>());
 
-    // 3. Hand off to the game loop.  run() only returns when the player
-    //    explicitly quits via the in-game menu.
+    // 3. Build the config manager — loads tetris_config.ini on construction.
+    FileConfigManager configManager;
+
+    // 4. Create the game object AFTER the console is ready.
+    game = new TetrisGame(*combined, configManager);
+
+    // 5. Hand off to the game loop.
     game->run();
+
+    // combined and configManager stay alive for the full duration above.
 }
 
 // ---------------------------------------------------------------------------

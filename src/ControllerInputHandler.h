@@ -41,6 +41,7 @@ public:
     bool wasJustHardDropPressed() const override;
     bool wasJustPausePressed()    const override;
     bool wasJustQuitPressed()     const override;
+    bool wasJustConfirmPressed()  const override;  // Start or A button
 
     // Frame update — captures a fresh XInput state snapshot
     void update() override;

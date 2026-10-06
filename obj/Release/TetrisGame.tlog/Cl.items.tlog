@@ -1,0 +1,11 @@
+C:\Users\nirma\Documents\Kiro\Blix\src\main.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\main.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\Tetromino.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\Tetromino.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\GameBoard.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\GameBoard.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\TetrominoManager.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\TetrominoManager.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\ConsoleRenderer.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\ConsoleRenderer.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\TetrisGame.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\TetrisGame.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\ScoreSystem.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\ScoreSystem.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\WindowsInputHandler.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\WindowsInputHandler.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\ControllerInputHandler.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\ControllerInputHandler.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\FileConfigManager.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\FileConfigManager.obj
+C:\Users\nirma\Documents\Kiro\Blix\src\TetrisApplication.cpp;C:\Users\nirma\Documents\Kiro\Blix\obj\Release\TetrisApplication.obj

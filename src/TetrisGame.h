@@ -3,6 +3,8 @@
 #include "TetrominoManager.h"
 #include "ConsoleRenderer.h"
 #include "ScoreSystem.h"
+#include "IInputHandler.h"
+#include "IConfigManager.h"
 #include <chrono>
 
 enum class GameState {
@@ -14,7 +16,8 @@ enum class GameState {
 
 class TetrisGame {
 public:
-    TetrisGame();
+    // inputHandler and configManager must outlive TetrisGame (owned by TetrisApplication).
+    explicit TetrisGame(IInputHandler& inputHandler, IConfigManager& configManager);
 
     void run();
 
@@ -23,6 +26,7 @@ public:
     int getScore()              const { return scoreSystem.getScore(); }
     int getLevel()              const { return scoreSystem.getLevel(); }
     int getLinesCleared()       const { return scoreSystem.getLinesCleared(); }
+    int getHighScore()          const { return highScore; }
 
 private:
     // ------------------------------------------------------------------ //
@@ -85,15 +89,22 @@ private:
     int  getDropSpeed() const;
 
     // ------------------------------------------------------------------ //
-    //  Input helpers
+    //  Input
     // ------------------------------------------------------------------ //
+    IInputHandler&  input;    // injected; owned by TetrisApplication
+    IConfigManager& config;   // injected; owned by TetrisApplication
+
     void handlePlayingInput();
 
-    bool isKeyPressed(int vkCode);
-    bool wasKeyJustPressed(int vkCode);
+    // ------------------------------------------------------------------ //
+    //  High score
+    // ------------------------------------------------------------------ //
+    int highScore;   // loaded from config on construction, updated on game over
 
-    bool prevKeyStates[256];
+    void checkAndSaveHighScore();
 
-    // Track whether the last render cleared the screen (avoid redundant cls)
+    // Track whether the last render cleared the screen (avoid redundant cls).
+    // Set to true by transitionTo(); cleared after the one-time static draw.
     GameState lastRenderedState;
+    bool      needsStaticRedraw;  // true whenever a state transition just occurred
 };

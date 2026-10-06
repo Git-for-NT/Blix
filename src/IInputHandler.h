@@ -90,6 +90,9 @@ public:
     virtual bool wasJustPausePressed()    const = 0;
     virtual bool wasJustQuitPressed()     const = 0;
 
+    // Confirm / menu-select (Enter key or controller Start/A)
+    virtual bool wasJustConfirmPressed()  const = 0;
+
     // ------------------------------------------------------------------
     // Frame update
     // ------------------------------------------------------------------

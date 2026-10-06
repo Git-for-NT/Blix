@@ -23,7 +23,7 @@ public:
 
     // Overlays
     virtual void renderPauseOverlay() = 0;
-    virtual void renderGameOverOverlay(int finalScore) = 0;
+    virtual void renderGameOverOverlay(int finalScore, int highScore) = 0;
 
     // Main menu screen
     virtual void renderMenu() = 0;

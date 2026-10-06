@@ -81,33 +81,39 @@ void ConsoleRenderer::renderPauseOverlay() {
     std::cout << "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x98";  // └─────────────┘
 }
 
-void ConsoleRenderer::renderGameOverOverlay(int finalScore) {
-    // Position the overlay below the board (board ends at row ~22 counting header).
-    // We use setCursorPosition so subsequent frames overwrite cleanly.
+void ConsoleRenderer::renderGameOverOverlay(int finalScore, int highScore) {
     const int col = 0;
     const int row = 22;  // just below the board bottom border
 
-    // Box is 24 chars wide: "╔══════════════════════╗"
     setCursorPosition(col, row);
     std::cout << "  \xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97";
     setCursorPosition(col, row + 1);
     std::cout << "  \xe2\x95\x91    ** GAME  OVER **   \xe2\x95\x91";
     setCursorPosition(col, row + 2);
     std::cout << "  \xe2\x95\x91                     \xe2\x95\x91";
-    setCursorPosition(col, row + 3);
 
-    // Format the score line so it is always padded to fill the box width
-    char scoreLine[32];
-    snprintf(scoreLine, sizeof(scoreLine), "  \xe2\x95\x91   Final Score: %-6d\xe2\x95\x91", finalScore);
+    setCursorPosition(col, row + 3);
+    char scoreLine[40];
+    snprintf(scoreLine, sizeof(scoreLine), "  \xe2\x95\x91   Score: %-10d  \xe2\x95\x91", finalScore);
     std::cout << scoreLine;
 
     setCursorPosition(col, row + 4);
-    std::cout << "  \xe2\x95\x91                     \xe2\x95\x91";
+    char hsLine[40];
+    const bool newRecord = (finalScore >= highScore && finalScore > 0);
+    if (newRecord) {
+        snprintf(hsLine, sizeof(hsLine), "  \xe2\x95\x91   Best:  %-10d* \xe2\x95\x91", highScore);
+    } else {
+        snprintf(hsLine, sizeof(hsLine), "  \xe2\x95\x91   Best:  %-10d  \xe2\x95\x91", highScore);
+    }
+    std::cout << hsLine;
+
     setCursorPosition(col, row + 5);
-    std::cout << "  \xe2\x95\x91  Enter: Restart      \xe2\x95\x91";
+    std::cout << "  \xe2\x95\x91                     \xe2\x95\x91";
     setCursorPosition(col, row + 6);
-    std::cout << "  \xe2\x95\x91  ESC:   Quit         \xe2\x95\x91";
+    std::cout << "  \xe2\x95\x91  Enter/Space: Menu  \xe2\x95\x91";
     setCursorPosition(col, row + 7);
+    std::cout << "  \xe2\x95\x91  Escape:      Quit  \xe2\x95\x91";
+    setCursorPosition(col, row + 8);
     std::cout << "  \xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d";
 }
 
@@ -241,4 +247,14 @@ void ConsoleRenderer::setCursorPosition(int x, int y) {
     coord.X = static_cast<SHORT>(x);
     coord.Y = static_cast<SHORT>(y);
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+void ConsoleRenderer::setCursorVisible(bool visible) {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hOut == INVALID_HANDLE_VALUE) return;
+    CONSOLE_CURSOR_INFO info;
+    if (GetConsoleCursorInfo(hOut, &info)) {
+        info.bVisible = visible ? TRUE : FALSE;
+        SetConsoleCursorInfo(hOut, &info);
+    }
 }

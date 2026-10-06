@@ -59,6 +59,7 @@ public:
     bool wasJustHardDropPressed() const override { return any(&IInputHandler::wasJustHardDropPressed); }
     bool wasJustPausePressed()    const override { return any(&IInputHandler::wasJustPausePressed);    }
     bool wasJustQuitPressed()     const override { return any(&IInputHandler::wasJustQuitPressed);     }
+    bool wasJustConfirmPressed()  const override { return any(&IInputHandler::wasJustConfirmPressed);  }
 
 private:
     std::vector<std::unique_ptr<IInputHandler>> m_handlers;

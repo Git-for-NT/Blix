@@ -44,6 +44,7 @@ public:
     bool wasJustHardDropPressed() const override;
     bool wasJustPausePressed()    const override;
     bool wasJustQuitPressed()     const override;
+    bool wasJustConfirmPressed()  const override;  // Enter key
 
     // ------------------------------------------------------------------
     // IInputHandler — frame update
@@ -67,6 +68,7 @@ private:
     KeyState down_;
     KeyState rotate_;
     KeyState hardDrop_;
-    KeyState pause_;   // ESC or P
-    KeyState quit_;    // ESC
+    KeyState pause_;    // ESC or P
+    KeyState quit_;     // ESC
+    KeyState confirm_;  // Enter (VK_RETURN)
 };

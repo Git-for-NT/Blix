@@ -34,6 +34,8 @@ void WindowsInputHandler::update() {
     snap(pause_,    isVKDown(VK_ESCAPE) || isVKDown('P'));
     // Quit also maps to ESC (game logic decides context)
     snap(quit_,     isVKDown(VK_ESCAPE));
+    // Confirm maps to Enter
+    snap(confirm_,  isVKDown(VK_RETURN));
 }
 
 // ---------------------------------------------------------------------------
@@ -68,3 +70,4 @@ bool WindowsInputHandler::wasJustRotatePressed()   const { return rotate_.curren
 bool WindowsInputHandler::wasJustHardDropPressed() const { return hardDrop_.current && !hardDrop_.prev; }
 bool WindowsInputHandler::wasJustPausePressed()    const { return pause_.current    && !pause_.prev;    }
 bool WindowsInputHandler::wasJustQuitPressed()     const { return quit_.current     && !quit_.prev;     }
+bool WindowsInputHandler::wasJustConfirmPressed()  const { return confirm_.current  && !confirm_.prev;  }

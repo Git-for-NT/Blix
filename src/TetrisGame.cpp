@@ -1,5 +1,4 @@
 #include "TetrisGame.h"
-#include <windows.h>
 #include <thread>
 #include <algorithm>
 #include <iostream>
@@ -8,16 +7,16 @@
 // Construction
 // ---------------------------------------------------------------------------
 
-TetrisGame::TetrisGame()
-    : state(GameState::Menu)
+TetrisGame::TetrisGame(IInputHandler& inputHandler, IConfigManager& configManager)
+    : input(inputHandler)
+    , config(configManager)
+    , highScore(configManager.loadHighScore())
+    , state(GameState::Menu)
     , dropInterval(std::chrono::milliseconds(Constants::INITIAL_DROP_SPEED_MS))
     , lastDropTime(std::chrono::steady_clock::now())
     , lastRenderedState(GameState::Menu)
+    , needsStaticRedraw(true)
 {
-    for (int i = 0; i < 256; ++i) {
-        prevKeyStates[i] = false;
-    }
-    // The first piece is spawned when transitioning to Playing, not here.
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +72,8 @@ void TetrisGame::transitionTo(GameState newState) {
             break;
 
         case GameState::GameOver:
-            // No special setup; final state is displayed until user acts
+            // Check and persist high score before showing game over screen
+            checkAndSaveHighScore();
             break;
     }
 
@@ -81,7 +81,8 @@ void TetrisGame::transitionTo(GameState newState) {
 
     // Screen needs to be redrawn on every state change
     renderer.clear();
-    lastRenderedState = newState;
+    lastRenderedState  = newState;
+    needsStaticRedraw  = true;
 }
 
 // ---------------------------------------------------------------------------
@@ -98,20 +99,18 @@ void TetrisGame::update() {
 }
 
 void TetrisGame::updateMenu() {
-    // Refresh key-state snapshot so wasKeyJustPressed works on the menu
-    for (int i = 0; i < 256; ++i) {
-        prevKeyStates[i] = (GetAsyncKeyState(i) & 0x8000) != 0;
-    }
+    input.update();
 
-    if (wasKeyJustPressed(VK_RETURN) || wasKeyJustPressed(' ')) {
+    if (input.wasJustConfirmPressed() || input.wasJustHardDropPressed()) {
         transitionTo(GameState::Playing);
-    } else if (wasKeyJustPressed(VK_ESCAPE)) {
+    } else if (input.wasJustQuitPressed()) {
         ExitProcess(0);
     }
 }
 
 void TetrisGame::updatePlaying() {
     // ── Input ──
+    input.update();
     handlePlayingInput();
 
     // We may have transitioned away during input (e.g., ESC -> pause)
@@ -128,15 +127,20 @@ void TetrisGame::updatePlaying() {
 }
 
 void TetrisGame::updatePaused() {
-    if (wasKeyJustPressed('P') || wasKeyJustPressed(VK_ESCAPE)) {
+    input.update();
+
+    if (input.wasJustPausePressed() || input.wasJustQuitPressed()) {
         transitionTo(GameState::Playing);
     }
 }
 
 void TetrisGame::updateGameOver() {
-    if (wasKeyJustPressed(VK_RETURN)) {
+    input.update();
+
+    if (input.wasJustConfirmPressed() || input.wasJustHardDropPressed()) {
+        // Enter or Space — return to menu
         transitionTo(GameState::Menu);
-    } else if (wasKeyJustPressed(VK_ESCAPE)) {
+    } else if (input.wasJustQuitPressed()) {
         ExitProcess(0);
     }
 }
@@ -155,19 +159,23 @@ void TetrisGame::render() {
 }
 
 void TetrisGame::renderMenu() {
-    // Only repaint if we just entered this state (transitionTo already called
-    // clear(); subsequent frames re-draw in-place via setCursorPosition).
-    static bool menuPrinted = false;
-    if (!menuPrinted || lastRenderedState != GameState::Menu) {
-        menuPrinted = true;
-        std::cout << "\n\n";
-        std::cout << "  ╔══════════════════════╗\n";
-        std::cout << "  ║      T E T R I S     ║\n";
-        std::cout << "  ║                      ║\n";
-        std::cout << "  ║  Enter / Space: Play ║\n";
-        std::cout << "  ║  Escape:        Quit ║\n";
-        std::cout << "  ╚══════════════════════╝\n";
-    }
+    if (!needsStaticRedraw) return;
+    needsStaticRedraw = false;
+
+    std::cout << "\n\n";
+    std::cout << "  \xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\n";
+    std::cout << "  \xe2\x95\x91      B L I X          \xe2\x95\x91\n";
+    std::cout << "  \xe2\x95\x91   (Tetris Clone)      \xe2\x95\x91\n";
+    std::cout << "  \xe2\x95\x91                       \xe2\x95\x91\n";
+
+    char hsLine[48];
+    snprintf(hsLine, sizeof(hsLine), "  \xe2\x95\x91  Best: %-14d\xe2\x95\x91", highScore);
+    std::cout << hsLine << "\n";
+
+    std::cout << "  \xe2\x95\x91                       \xe2\x95\x91\n";
+    std::cout << "  \xe2\x95\x91  Enter / Space: Play  \xe2\x95\x91\n";
+    std::cout << "  \xe2\x95\x91  Escape:        Quit  \xe2\x95\x91\n";
+    std::cout << "  \xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\n";
 }
 
 void TetrisGame::renderPlaying() {
@@ -184,7 +192,22 @@ void TetrisGame::renderPaused() {
 }
 
 void TetrisGame::renderGameOver() {
-    renderer.renderGameOverOverlay(scoreSystem.getScore());
+    if (!needsStaticRedraw) return;
+    needsStaticRedraw = false;
+
+    renderer.renderGameOverOverlay(scoreSystem.getScore(), highScore);
+}
+
+// ---------------------------------------------------------------------------
+// High score
+// ---------------------------------------------------------------------------
+
+void TetrisGame::checkAndSaveHighScore() {
+    const int current = scoreSystem.getScore();
+    if (current > highScore) {
+        highScore = current;
+        config.saveHighScore(highScore);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -242,57 +265,39 @@ int TetrisGame::getDropSpeed() const {
 // ---------------------------------------------------------------------------
 
 void TetrisGame::handlePlayingInput() {
-    // ESC -> Pause
-    if (wasKeyJustPressed(VK_ESCAPE)) {
-        transitionTo(GameState::Paused);
-        return;
-    }
-
-    // P -> Pause
-    if (wasKeyJustPressed('P')) {
+    // Pause (ESC or P via wasJustPausePressed)
+    if (input.wasJustPausePressed()) {
         transitionTo(GameState::Paused);
         return;
     }
 
     // Left
-    if (wasKeyJustPressed(VK_LEFT)) {
+    if (input.wasJustLeftPressed()) {
         pieceManager.moveLeft(board);
     }
 
     // Right
-    if (wasKeyJustPressed(VK_RIGHT)) {
+    if (input.wasJustRightPressed()) {
         pieceManager.moveRight(board);
     }
 
     // Down (soft drop – held key is fine)
-    if (isKeyPressed(VK_DOWN)) {
+    if (input.isDownPressed()) {
         if (pieceManager.moveDown(board)) {
-            scoreSystem.addBonus(1); // Soft-drop bonus
+            scoreSystem.addBonus(1);
         }
     }
 
-    // Up -> rotate
-    if (wasKeyJustPressed(VK_UP)) {
+    // Rotate
+    if (input.wasJustRotatePressed()) {
         pieceManager.rotate(board);
     }
 
-    // Space -> hard drop
-    if (wasKeyJustPressed(VK_SPACE)) {
+    // Hard drop
+    if (input.wasJustHardDropPressed()) {
         int rows = pieceManager.hardDrop(board);
-        scoreSystem.addBonus(rows * 2); // Hard-drop bonus
+        scoreSystem.addBonus(rows * 2);
         lockPiece();
-        // Reset the drop timer so the newly spawned piece gets a full interval
         lastDropTime = std::chrono::steady_clock::now();
     }
-}
-
-bool TetrisGame::isKeyPressed(int vkCode) {
-    return (GetAsyncKeyState(vkCode) & 0x8000) != 0;
-}
-
-bool TetrisGame::wasKeyJustPressed(int vkCode) {
-    bool current   = isKeyPressed(vkCode);
-    bool justPressed = current && !prevKeyStates[vkCode];
-    prevKeyStates[vkCode] = current;
-    return justPressed;
 }
